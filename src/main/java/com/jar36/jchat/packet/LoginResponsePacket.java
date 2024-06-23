@@ -2,6 +2,7 @@ package com.jar36.jchat.packet;
 
 public class LoginResponsePacket extends Packet{
     private long sessionToken;
+    private String reason;
     @Override
     public Short getCommand() {
         return Command.LOGIN_RESPONSE;
@@ -12,5 +13,13 @@ public class LoginResponsePacket extends Packet{
 
     public void setSessionToken(long sessionToken) {
         this.sessionToken = sessionToken;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

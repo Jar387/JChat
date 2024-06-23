@@ -1,5 +1,7 @@
 package com.jar36.jchat.server;
 
+import com.jar36.jchat.packet.PacketDecoder;
+import com.jar36.jchat.packet.PacketEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -23,7 +25,9 @@ public class ServerMain {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
-                        socketChannel.pipeline().addLast(new ServerHandler());
+                        socketChannel.pipeline().addLast(new PacketDecoder());
+                        socketChannel.pipeline().addLast(new LoginRequestHandler());
+                        socketChannel.pipeline().addLast(new PacketEncoder());
                     }
                 })
                 .childOption(ChannelOption.SO_KEEPALIVE, true);

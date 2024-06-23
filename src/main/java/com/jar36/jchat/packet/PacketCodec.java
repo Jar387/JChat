@@ -20,24 +20,34 @@ public class PacketCodec {
         serializer = new JsonSerializer();
     }
 
-    public ByteBuf encode(ByteBufAllocator allocator, Packet packet){
-        ByteBuf buf = allocator.ioBuffer();
+    public ByteBuf encode(ByteBuf buf, Packet packet){
         byte[] bytes = serializer.serialize(packet);
         // encode raw packet
         buf.writeInt(MAGIC);
         buf.writeShort(packet.getVersion());
         buf.writeShort(packet.getCommand());
         buf.writeInt(bytes.length);
-        buf.writeBytes(buf);
+        buf.writeBytes(bytes);
         return buf;
     }
 
     public Packet decode(ByteBuf buf){
-        buf.skipBytes(4); // skip magic
-        buf.skipBytes(2); // skip version
+        int magic = buf.readInt();
+        short version = buf.readShort();
+
+        if(magic!=MAGIC){
+            System.out.println("Unknown packet format");
+            System.exit(-1);
+        }
+        if(version>1){
+            // TODO: change this when protocol version changes
+            System.out.println("Unsupported protocol version");
+            System.exit(-1);
+        }
 
         short command = buf.readShort();
         int length = buf.readInt();
+
         byte[] bytes = new byte[length];
         buf.readBytes(bytes);
         Class <? extends Packet> clazz = packTypes.get(command);
