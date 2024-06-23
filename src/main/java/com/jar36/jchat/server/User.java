@@ -1,23 +1,23 @@
 package com.jar36.jchat.server;
 
+import com.jar36.jchat.server.data.UserData;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 
 import java.util.ArrayList;
 
 public class User {
-    public static ArrayList<User> users = new ArrayList<>();
-    private String name;
+    public static final ArrayList<User> users = new ArrayList<>();
+    private UserData userData;
     private long sessionToken;
     private String ip;
     private Channel channel;
 
-    public String getName() {
-        return name;
+    public UserData getUserData() {
+        return userData;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserData(UserData userData) {
+        this.userData = userData;
     }
 
     public long getSessionToken() {

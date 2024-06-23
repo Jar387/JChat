@@ -4,8 +4,6 @@ import com.jar36.jchat.packet.MessagePacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import static com.jar36.jchat.server.ServerMain.logger;
-
 public class ServerMessageHandler extends SimpleChannelInboundHandler<MessagePacket> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, MessagePacket messagePacket) {

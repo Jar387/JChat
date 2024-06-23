@@ -1,7 +1,6 @@
 package com.jar36.jchat.packet;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 import java.util.HashMap;
 
@@ -16,12 +15,12 @@ public class PacketCodec {
         packTypes = new HashMap<>();
         packTypes.put(Command.LOGIN_REQUEST, LoginRequestPacket.class);
         packTypes.put(Command.LOGIN_RESPONSE, LoginResponsePacket.class);
-        packTypes.put(Command.LOGOUT_REQUEST, LogoutRequestPacket.class);
         packTypes.put(Command.MESSAGE_REQUEST, MessagePacket.class);
+        packTypes.put(Command.SESSION_REQUEST, SessionPacket.class);
         serializer = new JsonSerializer();
     }
 
-    public ByteBuf encode(ByteBuf buf, Packet packet){
+    public void encode(ByteBuf buf, Packet packet){
         byte[] bytes = serializer.serialize(packet);
         // encode raw packet
         buf.writeInt(MAGIC);
@@ -29,7 +28,6 @@ public class PacketCodec {
         buf.writeShort(packet.getCommand());
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);
-        return buf;
     }
 
     public Packet decode(ByteBuf buf){

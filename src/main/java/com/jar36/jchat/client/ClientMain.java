@@ -10,7 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.util.Scanner;
+import javax.net.ssl.SSLException;
 
 public class ClientMain {
     public static long sessionToken;
@@ -18,9 +18,8 @@ public class ClientMain {
 
     public static void main(String[] Args) {
         // get username input
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Input username: ");
-        username = scanner.nextLine();
+
+        // SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap
@@ -29,6 +28,7 @@ public class ClientMain {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
+                        // socketChannel.pipeline().addFirst(sslContext.newHandler(socketChannel.alloc()));
                         socketChannel.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 8, 4));
                         socketChannel.pipeline().addLast(new PacketDecoder());
                         socketChannel.pipeline().addLast(new LoginResponseHandler());
