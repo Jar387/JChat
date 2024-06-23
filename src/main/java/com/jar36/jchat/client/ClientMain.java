@@ -8,11 +8,19 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+
+import java.util.Scanner;
 
 public class ClientMain {
     public static long sessionToken;
+    public static String username;
 
     public static void main(String[] Args) {
+        // get username input
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Input username: ");
+        username = scanner.nextLine();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap
@@ -21,8 +29,10 @@ public class ClientMain {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
+                        socketChannel.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 8, 4));
                         socketChannel.pipeline().addLast(new PacketDecoder());
                         socketChannel.pipeline().addLast(new LoginResponseHandler());
+                        socketChannel.pipeline().addLast(new ClientMessageHandler());
                         socketChannel.pipeline().addLast(new PacketEncoder());
                     }
                 })

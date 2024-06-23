@@ -4,4 +4,5 @@ public interface Command {
     Short LOGIN_REQUEST = 0x1;
     Short LOGIN_RESPONSE = 0x2;
     Short LOGOUT_REQUEST = 0x3;
+    Short MESSAGE_REQUEST = 0x4;
 }

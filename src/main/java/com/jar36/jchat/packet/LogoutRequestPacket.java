@@ -1,5 +1,6 @@
 package com.jar36.jchat.packet;
 
+@Deprecated
 public class LogoutRequestPacket extends Packet{
     private long sessionToken;
     @Override
