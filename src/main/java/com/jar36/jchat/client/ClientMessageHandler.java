@@ -10,19 +10,19 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<MessagePac
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         // start a new thread to get user input
-        new Thread(()->{
+        new Thread(() -> {
             Scanner scanner = new Scanner(System.in);
             MessagePacket messagePacket = new MessagePacket();
             messagePacket.setUsername(ClientMain.username);
-            while(true){
+            while (true) {
                 System.out.print(">>>");
                 String input = scanner.nextLine();
-                if(input.compareTo("q")==0){
+                if (input.compareTo("q") == 0) {
                     ctx.close();
                     System.exit(0);
                 }
                 messagePacket.setMsg(input);
-                ctx.executor().submit(()->{
+                ctx.executor().submit(() -> {
                     ctx.channel().writeAndFlush(messagePacket);
                 });
             }
@@ -33,6 +33,6 @@ public class ClientMessageHandler extends SimpleChannelInboundHandler<MessagePac
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, MessagePacket messagePacket) {
         String user = messagePacket.getUsername();
         String msg = messagePacket.getMsg();
-        System.out.println(user+": "+msg);
+        System.out.println(user + ": " + msg);
     }
 }

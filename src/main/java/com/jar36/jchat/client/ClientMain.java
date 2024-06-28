@@ -10,8 +10,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import javax.net.ssl.SSLException;
-
 public class ClientMain {
     public static long sessionToken;
     public static String username;

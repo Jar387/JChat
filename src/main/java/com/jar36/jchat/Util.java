@@ -31,7 +31,7 @@ public class Util {
 
     public static Path checkFileExist(String path) throws IOException {
         Path path1 = Paths.get(path);
-        if(!Files.exists(path1)){
+        if (!Files.exists(path1)) {
             Files.createFile(path1);
             return null;
         }

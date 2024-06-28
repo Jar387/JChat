@@ -13,17 +13,17 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.util.logging.Logger;
 
 public class ServerMain {
     public static final Logger logger = Logger.getLogger("server");
+
     public static void main(String[] Args) throws InterruptedException, IOException {
         // selfSignedCertificate = new SelfSignedCertificate();
         // SslContext sslContext = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).build();
 
         // load user data
-        UserDataManager.loadUserData();
+        UserDataManager.loadDatabase();
         NioEventLoopGroup bossGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 

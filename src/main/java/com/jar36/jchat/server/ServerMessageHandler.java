@@ -8,15 +8,16 @@ public class ServerMessageHandler extends SimpleChannelInboundHandler<MessagePac
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, MessagePacket messagePacket) {
         // broadcast raw packet
-        for(User u:User.users){
+        for (User u : User.users) {
             u.getChannel().writeAndFlush(messagePacket);
         }
     }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(msg instanceof MessagePacket){
+        if (msg instanceof MessagePacket) {
             super.channelRead(ctx, msg);
-        }else {
+        } else {
             ctx.fireChannelRead(msg);
         }
     }

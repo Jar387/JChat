@@ -1,13 +1,15 @@
 package com.jar36.jchat.packet;
 
-public class LoginResponsePacket extends Packet{
+public class LoginResponsePacket extends Packet {
     private long sessionToken;
     private String reason;
     private char subfunction;
+
     @Override
     public Short getCommand() {
         return Command.LOGIN_RESPONSE;
     }
+
     public long getSessionToken() {
         return sessionToken;
     }
