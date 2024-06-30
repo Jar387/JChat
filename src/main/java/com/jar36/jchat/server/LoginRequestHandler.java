@@ -4,7 +4,6 @@ import com.jar36.jchat.packet.Command;
 import com.jar36.jchat.packet.LoginRequestPacket;
 import com.jar36.jchat.packet.LoginResponsePacket;
 import com.jar36.jchat.server.data.UserData;
-import com.jar36.jchat.server.data.UserDataManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
