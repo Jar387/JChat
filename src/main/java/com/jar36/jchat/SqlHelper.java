@@ -64,8 +64,10 @@ public class SqlHelper {
         sb.append(clazz.getSimpleName()).append(" WHERE ");
         Field[] fields = clazz.getDeclaredFields();
         sb.append(key).append(" = ").append(value.toString()).append(';');
-        ServerMain.logger.info(sb.toString());
         ResultSet resultSet = statement.executeQuery(sb.toString());
+        if(!resultSet.next()){
+            return null;
+        }
         T result = clazz.getDeclaredConstructor().newInstance();
         char sqlComaptability;
         for (Field f : fields) {
@@ -88,8 +90,10 @@ public class SqlHelper {
         sb.append(clazz.getSimpleName()).append(" WHERE ");
         Field[] fields = clazz.getDeclaredFields();
         sb.append(key).append(" = \"").append(value).append("\";");
-        ServerMain.logger.info(sb.toString());
         ResultSet resultSet = statement.executeQuery(sb.toString());
+        if(!resultSet.next()){
+            return null;
+        }
         T result = clazz.getDeclaredConstructor().newInstance();
         char sqlComaptability;
         for (Field f : fields) {
@@ -172,7 +176,6 @@ public class SqlHelper {
             sb.append(value1);
         }
         sb.append(';');
-        ServerMain.logger.info(sb.toString());
         statement.execute(sb.toString());
     }
 
@@ -194,7 +197,6 @@ public class SqlHelper {
         }
         sb.append(" WHERE ").append(primary).append(" = \"").append(value).append('\"');
         sb.append(';');
-        ServerMain.logger.info(sb.toString());
         statement.execute(sb.toString());
     }
 
@@ -216,7 +218,6 @@ public class SqlHelper {
         }
         sb.append(" WHERE ").append(primary).append(" = ").append(value);
         sb.append(';');
-        ServerMain.logger.info(sb.toString());
         statement.execute(sb.toString());
     }
 }

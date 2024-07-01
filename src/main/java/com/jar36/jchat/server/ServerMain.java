@@ -47,7 +47,7 @@ public class ServerMain {
                         socketChannel.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 8, 4));
                         socketChannel.pipeline().addLast(new PacketDecoder());
                         socketChannel.pipeline().addLast(new LoginRequestHandler());
-                        socketChannel.pipeline().addLast(new ServerMessageHandler());
+                        // socketChannel.pipeline().addLast(new ServerMessageHandler());
                         socketChannel.pipeline().addLast(new PacketEncoder());
                     }
                 })

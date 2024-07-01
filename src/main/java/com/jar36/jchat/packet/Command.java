@@ -3,11 +3,15 @@ package com.jar36.jchat.packet;
 public interface Command {
     Short LOGIN_REQUEST = 0x1;
     Short LOGIN_RESPONSE = 0x2;
-    Short MESSAGE_REQUEST = 0x3;
-    Short SESSION_REQUEST = 0x4;
+    Short DATA_GET = 0x3;
+    Short DATA_POST = 0x4;
 
     char LOGIN_REQUEST_SUBFUNCTION_LOGIN = 0x1;
     char LOGIN_REQUEST_SUBFUNCTION_CREATE_USER = 0x2;
-//    char LOGIN_REQUEST_SUBFUNCTION_CHANGE_USERNAME = 0x3;
-//    char LOGIN_REQUEST_SUBFUNCTION_CHANGE_PASSWD = 0x4;
+
+    char DATA_GET_SESSION_MESSAGE = 0x1;
+    char DATA_GET_SESSION_LIST = 0x2;
+
+    char DATA_POST_CREATE_SESSION = 0x1;
+    char DATA_POST_SESSION_MESSAGE = 0x2;
 }

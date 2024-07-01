@@ -1,22 +1,25 @@
 package com.jar36.jchat.client;
 
-import com.jar36.jchat.packet.PacketDecoder;
-import com.jar36.jchat.packet.PacketEncoder;
+import com.jar36.jchat.packet.*;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.util.CharsetUtil;
+
+import java.util.Date;
 
 public class ClientMain {
     public static long sessionToken;
     public static String username;
 
     public static void main(String[] Args) {
-        // get username input
-
+        // uncomment this when publish with ssl
         // SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
@@ -30,7 +33,7 @@ public class ClientMain {
                         socketChannel.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 8, 4));
                         socketChannel.pipeline().addLast(new PacketDecoder());
                         socketChannel.pipeline().addLast(new LoginResponseHandler());
-                        socketChannel.pipeline().addLast(new ClientMessageHandler());
+                        socketChannel.pipeline().addLast(new ClientGetHandler());
                         socketChannel.pipeline().addLast(new PacketEncoder());
                     }
                 })
@@ -44,5 +47,15 @@ public class ClientMain {
             }
         });
 
+    }
+    private static void printAsString(ByteBuf buffer) {
+        System.out.println("As String:");
+        if (buffer.isReadable()) {
+            // Convert the readable bytes to a string using UTF-8 encoding
+            String str = buffer.toString(CharsetUtil.UTF_8);
+            System.out.println(str);
+        } else {
+            System.out.println("Buffer is not readable.");
+        }
     }
 }

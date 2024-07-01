@@ -1,12 +1,12 @@
 package com.jar36.jchat.packet;
 
-public class MessagePacket extends Packet {
+public class PostDataPacket extends Packet {
     private String msg;
     private String username;
 
     @Override
     public Short getCommand() {
-        return Command.MESSAGE_REQUEST;
+        return Command.DATA_GET;
     }
 
     public String getMsg() {

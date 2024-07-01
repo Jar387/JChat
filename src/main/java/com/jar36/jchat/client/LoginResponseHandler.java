@@ -30,7 +30,7 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
         LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
         loginRequestPacket.setUsername(ClientMain.username);
         loginRequestPacket.setPasswdHash(passwdHash);
-        loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_LOGIN);
+        loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_CREATE_USER);
         ctx.channel().writeAndFlush(loginRequestPacket);
     }
 
@@ -43,6 +43,12 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
             System.out.println("Login successfully! Your session token is " + loginResponsePacket.getSessionToken());
             ClientMain.sessionToken = loginResponsePacket.getSessionToken();
         }
-        channelHandlerContext.fireChannelActive();
+        channelHandlerContext.fireChannelRead(loginResponsePacket);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("Connection to server was lost! exiting");
+        System.exit(0);
     }
 }

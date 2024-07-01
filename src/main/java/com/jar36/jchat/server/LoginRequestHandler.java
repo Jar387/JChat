@@ -1,134 +1,87 @@
 package com.jar36.jchat.server;
 
+import com.jar36.jchat.SqlHelper;
+import com.jar36.jchat.Util;
 import com.jar36.jchat.packet.Command;
 import com.jar36.jchat.packet.LoginRequestPacket;
 import com.jar36.jchat.packet.LoginResponsePacket;
 import com.jar36.jchat.server.data.UserData;
+import com.jar36.jchat.server.data.UserDataManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Random;
 
 import static com.jar36.jchat.server.ServerMain.logger;
 
 public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginRequestPacket> {
-    private void loginHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) {
+    private void loginHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
         loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
-        for (UserData ud : UserData.userData) { // on disk database
-            if (ud.getName().compareTo(loginRequestPacket.getUsername()) == 0) { // user exist
-                for (User u : User.users) {
-                    if (u.getUserData().getName().compareTo(loginRequestPacket.getUsername()) == 0) { // already logged in
-                        loginResponsePacket.setSessionToken(0);
-                        loginResponsePacket.setReason("Cannot login: your account already logged in");
-                        channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-                        return;
-                    }
-                }
-                if (ud.getPasswdHash().compareTo(loginRequestPacket.getPasswdHash()) == 0) { // passwd ok
-                    User user = new User();
-                    user.setIp(channelHandlerContext.channel().remoteAddress().toString());
-                    user.setChannel(channelHandlerContext.channel());
-                    user.setUserData(ud);
-                    logger.info("Client connected, username " + ud.getName() + " ip " + user.getIp());
-                    Random random = new Random();
-                    long sessionToken = random.nextLong();
-                    loginResponsePacket.setSessionToken(sessionToken);
-                    loginResponsePacket.setReason("success");
-                    user.setSessionToken(sessionToken);
+        UserData ud = SqlHelper.queryTableToObject(UserDataManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
+        if (ud != null) { // user exist
+                if (Util.verifyUsername(loginRequestPacket.getUsername())!=null) { // already logged in
+                    loginResponsePacket.setSessionToken(0);
+                    loginResponsePacket.setReason("Cannot login: your account already logged in");
                     channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-                    User.users.add(user); // in memory database
                     return;
                 }
-                loginResponsePacket.setSessionToken(0);
-                loginResponsePacket.setReason("Cannot login: password error");
+            if (ud.getPasswdHash().compareTo(loginRequestPacket.getPasswdHash()) == 0) { // passwd ok
+                User user = new User();
+                user.setIp(channelHandlerContext.channel().remoteAddress().toString());
+                user.setChannel(channelHandlerContext.channel());
+                user.setUserData(ud);
+                logger.info("Client connected, username " + ud.getName() + " ip " + user.getIp());
+                Random random = new Random();
+                long sessionToken = random.nextLong();
+                loginResponsePacket.setSessionToken(sessionToken);
+                loginResponsePacket.setReason("success");
+                user.setSessionToken(sessionToken);
                 channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+                User.users.add(user); // in memory database
                 return;
             }
+            loginResponsePacket.setSessionToken(0);
+            loginResponsePacket.setReason("Cannot login: password error");
+            channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+            return;
         }
         loginResponsePacket.setSessionToken(0);
         loginResponsePacket.setReason("Cannot login: user not exist");
         channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
     }
 
-    private void createUserHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException {
+    private void createUserHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException, SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
         loginResponsePacket.setSessionToken(0);
         loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
         if (loginRequestPacket.getUsername().isEmpty() || loginRequestPacket.getUsername().length() > 255) { // check username length
             loginResponsePacket.setReason("Cannot create user: illegal username length");
             channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+            return;
         }
-        for (UserData ud : UserData.userData) { // check user exists
-            if (ud.getName().compareTo(loginRequestPacket.getUsername()) == 0) {
-                loginResponsePacket.setReason("Cannot create user: username exists");
-                channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-            }
+        UserData ud = SqlHelper.queryTableToObject(UserDataManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername()); // check user exists
+        if (ud!=null) {
+            loginResponsePacket.setReason("Cannot create user: username exists");
+            channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+            return;
         }
         UserData userData = new UserData();
-        userData.setUid(UserData.userData.size() + 1);
+        userData.setUid(UserDataManager.nextUid);
+        UserDataManager.nextUid++;
         userData.setName(loginRequestPacket.getUsername());
         userData.setPasswdHash(loginRequestPacket.getPasswdHash());
-        UserData.userData.add(userData);
+        SqlHelper.insertObject(UserDataManager.userDataBaseStatement, UserData.class, userData);
         loginResponsePacket.setReason("success");
         loginResponsePacket.setSessionToken(1);
         channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
     }
 
-//    private void changePasswdHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException {
-//        LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
-//        loginResponsePacket.setSessionToken(0);
-//        for (UserData ud : UserData.userData) { // check user exists
-//            if (ud.getName().compareTo(loginRequestPacket.getUsername()) == 0) {
-//                if (ud.getPasswdHash().compareTo(loginRequestPacket.getOldPasswdHash()) == 0) {
-//                    ud.setPasswdHash(loginRequestPacket.getPasswdHash());
-//                    loginResponsePacket.setSessionToken(1);
-//                    loginResponsePacket.setReason("success");
-//                    channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//                    UserDataManager.saveUserData();
-//                } else {
-//                    loginResponsePacket.setReason("Cannot change password: old password error");
-//                    channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//                }
-//                return;
-//            }
-//        }
-//        loginResponsePacket.setReason("Cannot change password: user not exist");
-//        channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//    }
-//
-//    private void changeUserNameHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException {
-//        String ip = channelHandlerContext.channel().remoteAddress().toString();
-//        LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
-//        loginResponsePacket.setSessionToken(0);
-//        for (User u : User.users) {
-//            if (ip.compareTo(u.getIp()) == 0) { // find user logged in
-//                for (UserData ud : UserData.userData) {
-//                    if (ud == u.getUserData()) {
-//                        if (loginRequestPacket.getUsername().isEmpty() || loginRequestPacket.getUsername().length() > 255) { // check username length
-//                            loginResponsePacket.setReason("Cannot change username: illegal username length");
-//                            channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//                        } else {
-//                            loginResponsePacket.setSessionToken(1);
-//                            ud.setName(loginRequestPacket.getUsername());
-//                            loginResponsePacket.setReason("success");
-//                            channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//                            UserDataManager.saveUserData();
-//                        }
-//                        return;
-//                    }
-//                }
-//                loginResponsePacket.setReason("Cannot change username: server internal error");
-//                channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//            }
-//        }
-//        loginResponsePacket.setReason("Cannot change username: client internal error");
-//        channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-//    }
-
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException, SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         switch (loginRequestPacket.getSubfunction()) {
             case Command.LOGIN_REQUEST_SUBFUNCTION_LOGIN:
                 loginHandler(channelHandlerContext, loginRequestPacket);
@@ -136,12 +89,6 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
             case Command.LOGIN_REQUEST_SUBFUNCTION_CREATE_USER:
                 createUserHandler(channelHandlerContext, loginRequestPacket);
                 break;
-//            case Command.LOGIN_REQUEST_SUBFUNCTION_CHANGE_PASSWD:
-//                changePasswdHandler(channelHandlerContext, loginRequestPacket);
-//                break;
-//            case Command.LOGIN_REQUEST_SUBFUNCTION_CHANGE_USERNAME:
-//                changeUserNameHandler(channelHandlerContext, loginRequestPacket);
-//                break;
             default:
                 LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
                 loginResponsePacket.setSessionToken(0);
@@ -171,6 +118,5 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
                 return;
             }
         }
-        logger.warning("Cannot find disconnected user in registered user list");
     }
 }

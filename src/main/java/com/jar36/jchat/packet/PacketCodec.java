@@ -14,8 +14,8 @@ public class PacketCodec {
         packTypes = new HashMap<>();
         packTypes.put(Command.LOGIN_REQUEST, LoginRequestPacket.class);
         packTypes.put(Command.LOGIN_RESPONSE, LoginResponsePacket.class);
-        packTypes.put(Command.MESSAGE_REQUEST, MessagePacket.class);
-        packTypes.put(Command.SESSION_REQUEST, SessionPacket.class);
+        packTypes.put(Command.DATA_GET, PostDataPacket.class);
+        packTypes.put(Command.DATA_POST, GetDataPacket.class);
         serializer = new JsonSerializer();
     }
 

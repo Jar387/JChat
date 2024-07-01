@@ -3,7 +3,6 @@ package com.jar36.jchat.packet;
 public class LoginRequestPacket extends Packet {
     private String username;
     private String passwdHash;
-    private String oldPasswdHash;
     private char subfunction;
 
     public String getPasswdHash() {
@@ -34,12 +33,4 @@ public class LoginRequestPacket extends Packet {
     public Short getCommand() {
         return Command.LOGIN_REQUEST;
     }
-
-//    public String getOldPasswdHash() {
-//        return oldPasswdHash;
-//    }
-//
-//    public void setOldPasswdHash(String oldPasswdHash) {
-//        this.oldPasswdHash = oldPasswdHash;
-//    }
 }

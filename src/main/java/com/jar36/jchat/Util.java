@@ -1,5 +1,7 @@
 package com.jar36.jchat;
 
+import com.jar36.jchat.server.User;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,5 +38,23 @@ public class Util {
             return null;
         }
         return path1;
+    }
+
+    public static User verifySessionToken(long sessionToken) {
+        for (User u : User.users) {
+            if (u.getSessionToken() == sessionToken) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    public static User verifyUsername(String username) {
+        for (User u : User.users) {
+            if (u.getUserData().getName().compareTo(username) == 0) {
+                return u;
+            }
+        }
+        return null;
     }
 }
