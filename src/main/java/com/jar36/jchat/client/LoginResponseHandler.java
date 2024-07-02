@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginResponsePacket> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+        // 1st called
         // connect to server
         System.out.println("Logging to server");
 
@@ -30,12 +31,23 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
         LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
         loginRequestPacket.setUsername(ClientMain.username);
         loginRequestPacket.setPasswdHash(passwdHash);
-        loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_CREATE_USER);
+        loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_LOGIN);
         ctx.channel().writeAndFlush(loginRequestPacket);
     }
 
     @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof LoginResponsePacket) {
+            super.channelRead(ctx, msg);
+        } else {
+            ctx.fireChannelRead(msg);
+        }
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, LoginResponsePacket loginResponsePacket) {
+        // 2nd called
+        // may be called later?
         if (loginResponsePacket.getSessionToken() == 0) { // login fail
             System.out.println(loginResponsePacket.getReason());
             System.exit(-1);
@@ -43,7 +55,7 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
             System.out.println("Login successfully! Your session token is " + loginResponsePacket.getSessionToken());
             ClientMain.sessionToken = loginResponsePacket.getSessionToken();
         }
-        channelHandlerContext.fireChannelRead(loginResponsePacket);
+        channelHandlerContext.fireChannelActive();
     }
 
     @Override

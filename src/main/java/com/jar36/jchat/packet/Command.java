@@ -1,11 +1,13 @@
 package com.jar36.jchat.packet;
 
 public interface Command {
+    // packet head command
     Short LOGIN_REQUEST = 0x1;
     Short LOGIN_RESPONSE = 0x2;
     Short DATA_GET = 0x3;
     Short DATA_POST = 0x4;
 
+    // in-packet function select
     char LOGIN_REQUEST_SUBFUNCTION_LOGIN = 0x1;
     char LOGIN_REQUEST_SUBFUNCTION_CREATE_USER = 0x2;
 

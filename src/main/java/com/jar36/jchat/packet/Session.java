@@ -1,9 +1,10 @@
 package com.jar36.jchat.packet;
 
 public class Session {
-    private int uid1;
-    private int uid2;
-    String name;
+    private int uid1; // one of session users
+    private int uid2; // another session user
+    // TODO: replace this with ArrayList after groupchat function is implemented
+    String name; // session title name
 
     public int getUid1() {
         return uid1;
