@@ -6,7 +6,7 @@ import com.jar36.jchat.packet.Command;
 import com.jar36.jchat.packet.LoginRequestPacket;
 import com.jar36.jchat.packet.LoginResponsePacket;
 import com.jar36.jchat.server.data.UserData;
-import com.jar36.jchat.server.data.UserDataManager;
+import com.jar36.jchat.server.data.SqlManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -21,7 +21,7 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
     private void loginHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
         loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
-        UserData ud = SqlHelper.queryTableToObject(UserDataManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
+        UserData ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
         if (ud != null) { // user exist
                 if (Util.verifyUsername(loginRequestPacket.getUsername())!=null) { // already logged in
                     loginResponsePacket.setSessionToken(0);
@@ -38,7 +38,6 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
                 Random random = new Random();
                 long sessionToken = random.nextLong();
                 loginResponsePacket.setSessionToken(sessionToken);
-                loginResponsePacket.setReason("success");
                 user.setSessionToken(sessionToken);
                 channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
                 User.users.add(user); // in memory database
@@ -63,19 +62,18 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
             channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
             return;
         }
-        UserData ud = SqlHelper.queryTableToObject(UserDataManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername()); // check user exists
+        UserData ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername()); // check user exists
         if (ud!=null) {
             loginResponsePacket.setReason("Cannot create user: username exists");
             channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
             return;
         }
         UserData userData = new UserData();
-        userData.setUid(UserDataManager.nextUid);
-        UserDataManager.nextUid++;
+        userData.setUid(SqlManager.nextUid);
+        SqlManager.nextUid++;
         userData.setName(loginRequestPacket.getUsername());
         userData.setPasswdHash(loginRequestPacket.getPasswdHash());
-        SqlHelper.insertObject(UserDataManager.userDataBaseStatement, UserData.class, userData);
-        loginResponsePacket.setReason("success");
+        SqlHelper.insertObject(SqlManager.userDataBaseStatement, UserData.class, userData);
         loginResponsePacket.setSessionToken(1);
         channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
     }

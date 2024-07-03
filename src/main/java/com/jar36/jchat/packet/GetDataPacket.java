@@ -4,6 +4,7 @@ public class GetDataPacket extends Packet { // um? this is like RPC?
     private char subfunction; // function select
     // data body start
     private int id; // parameter used to pass parameter of ids (like sid, uid, gid ...)
+    private String reason; // use as error reason return
     private Message[] messages;
     private Session[] sessions;
     // data body ends
@@ -51,5 +52,13 @@ public class GetDataPacket extends Packet { // um? this is like RPC?
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

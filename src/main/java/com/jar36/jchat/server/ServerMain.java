@@ -1,11 +1,9 @@
 package com.jar36.jchat.server;
 
-import com.jar36.jchat.packet.Message;
+import com.jar36.jchat.LoggerFormatter;
 import com.jar36.jchat.packet.PacketDecoder;
 import com.jar36.jchat.packet.PacketEncoder;
-import com.jar36.jchat.packet.Session;
-import com.jar36.jchat.server.data.SessionMessageManager;
-import com.jar36.jchat.server.data.UserDataManager;
+import com.jar36.jchat.server.data.SqlManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -15,20 +13,18 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.Logger;
 
 public class ServerMain {
-    public static final Logger logger = Logger.getLogger("server");
+    public static final Logger logger = LoggerFormatter.installFormatter(Logger.getLogger(ServerMain.class.getSimpleName()));
+    public static final short port = 8888;
 
     public static void main(String[] Args) throws InterruptedException {
         // selfSignedCertificate = new SelfSignedCertificate();
         // SslContext sslContext = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).build();
-
+        logger.info("Generating keypair...done");
         // load user data
-        UserDataManager.loadDatabase();
+        SqlManager.loadDatabase();
         NioEventLoopGroup bossGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -48,8 +44,8 @@ public class ServerMain {
                     }
                 })
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
-        logger.info("Server Started");
-        ChannelFuture channelFuture = serverBootstrap.bind(8888).sync();
+        ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
+        logger.info("Server Started at port " + port);
         channelFuture.channel().closeFuture().sync();
 
         bossGroup.shutdownGracefully();

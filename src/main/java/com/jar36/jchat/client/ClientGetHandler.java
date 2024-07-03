@@ -26,6 +26,9 @@ public class ClientGetHandler extends SimpleChannelInboundHandler<GetDataPacket>
         GetDataPacket getDataPacket = new GetDataPacket();
         getDataPacket.setSessionToken(ClientMain.sessionToken);
         getDataPacket.setSubfunction(Command.DATA_GET_SESSION_LIST);
+        ctx.channel().writeAndFlush(getDataPacket);
+
+        getDataPacket.setSubfunction(Command.DATA_GET_SESSION_MESSAGE);
         getDataPacket.setId(1);
         ctx.channel().writeAndFlush(getDataPacket);
         System.out.println("data sent");
