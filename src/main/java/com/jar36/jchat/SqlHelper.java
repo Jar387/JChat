@@ -1,7 +1,5 @@
 package com.jar36.jchat;
 
-import com.jar36.jchat.server.ServerMain;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
@@ -65,7 +63,7 @@ public class SqlHelper {
         Field[] fields = clazz.getDeclaredFields();
         sb.append(key).append(" = ").append(value.toString()).append(';');
         ResultSet resultSet = statement.executeQuery(sb.toString());
-        if(!resultSet.next()){
+        if (!resultSet.next()) {
             return null;
         }
         T result = clazz.getDeclaredConstructor().newInstance();
@@ -91,7 +89,7 @@ public class SqlHelper {
         Field[] fields = clazz.getDeclaredFields();
         sb.append(key).append(" = \"").append(value).append("\";");
         ResultSet resultSet = statement.executeQuery(sb.toString());
-        if(!resultSet.next()){
+        if (!resultSet.next()) {
             return null;
         }
         T result = clazz.getDeclaredConstructor().newInstance();

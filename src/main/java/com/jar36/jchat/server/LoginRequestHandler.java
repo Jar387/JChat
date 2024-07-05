@@ -5,8 +5,8 @@ import com.jar36.jchat.Util;
 import com.jar36.jchat.packet.Command;
 import com.jar36.jchat.packet.LoginRequestPacket;
 import com.jar36.jchat.packet.LoginResponsePacket;
-import com.jar36.jchat.server.data.UserData;
 import com.jar36.jchat.server.data.SqlManager;
+import com.jar36.jchat.server.data.UserData;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -23,12 +23,12 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
         loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
         UserData ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
         if (ud != null) { // user exist
-                if (Util.verifyUsername(loginRequestPacket.getUsername())!=null) { // already logged in
-                    loginResponsePacket.setSessionToken(0);
-                    loginResponsePacket.setReason("Cannot login: your account already logged in");
-                    channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-                    return;
-                }
+            if (Util.verifyUsername(loginRequestPacket.getUsername()) != null) { // already logged in
+                loginResponsePacket.setSessionToken(0);
+                loginResponsePacket.setReason("Cannot login: your account already logged in");
+                channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+                return;
+            }
             if (ud.getPasswdHash().compareTo(loginRequestPacket.getPasswdHash()) == 0) { // passwd ok
                 User user = new User();
                 user.setIp(channelHandlerContext.channel().remoteAddress().toString());
@@ -63,7 +63,7 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
             return;
         }
         UserData ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername()); // check user exists
-        if (ud!=null) {
+        if (ud != null) {
             loginResponsePacket.setReason("Cannot create user: username exists");
             channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
             return;

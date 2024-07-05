@@ -9,6 +9,7 @@ public class GetDataPacket extends Packet { // um? this is like RPC?
     private Session[] sessions;
     // data body ends
     private long sessionToken; // use as return value
+
     @Override
     public Short getCommand() {
         return Command.DATA_POST;

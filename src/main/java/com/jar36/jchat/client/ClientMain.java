@@ -1,6 +1,8 @@
 package com.jar36.jchat.client;
 
-import com.jar36.jchat.packet.*;
+import com.jar36.jchat.client.widgets.Label;
+import com.jar36.jchat.packet.PacketDecoder;
+import com.jar36.jchat.packet.PacketEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -12,6 +14,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import java.io.IOException;
 
 public class ClientMain {
+    public static final String about = "JChat client v0.1";
     public static long sessionToken;
     public static String username;
 
@@ -39,10 +42,11 @@ public class ClientMain {
                 .option(ChannelOption.SO_KEEPALIVE, true);
         bootstrap.connect("127.0.0.1", 8888).addListener(future -> {
             if (future.isSuccess()) {
-                System.out.println("Connected to server");
+                Label label = new Label(new String[]{"Connected to the server successfully"}, about);
+                label.showLabel(UI.terminal);
+                label.removeLabel(UI.terminal);
             } else {
-                System.out.println("Cannot connect to the server");
-                System.exit(-1);
+                UI.error("Cannot connect to the server");
             }
         });
 
