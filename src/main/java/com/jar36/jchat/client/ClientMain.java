@@ -1,9 +1,10 @@
 package com.jar36.jchat.client;
 
-import com.jar36.jchat.client.widgets.Label;
 import com.jar36.jchat.packet.PacketDecoder;
 import com.jar36.jchat.packet.PacketEncoder;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,15 +12,15 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.io.IOException;
-
 public class ClientMain {
     public static final String about = "JChat client v0.1";
     public static long sessionToken;
     public static String username;
+    public static String passwdHash;
 
-    public static void main(String[] Args) throws IOException, InterruptedException {
-        UI.InitializeUI();
+    public static Channel channel;
+
+    public static void main(String[] Args) {
         // init network
         // uncomment this when publish with ssl
         // SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
@@ -40,15 +41,15 @@ public class ClientMain {
                     }
                 })
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        bootstrap.connect("127.0.0.1", 8888).addListener(future -> {
+        ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", 8888).addListener(future -> {
             if (future.isSuccess()) {
-                Label label = new Label(new String[]{"Connected to the server successfully"}, about);
-                label.showLabel(UI.terminal);
-                label.removeLabel(UI.terminal);
+                System.out.println("Connected to the server successfully");
             } else {
                 UI.error("Cannot connect to the server");
+                System.exit(-1);
             }
         });
-
+        channel = channelFuture.channel();
+        UI.startLoginInterface();
     }
 }

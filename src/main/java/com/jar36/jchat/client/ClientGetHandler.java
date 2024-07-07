@@ -7,7 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ClientGetHandler extends SimpleChannelInboundHandler<GetDataPacket> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, GetDataPacket msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, GetDataPacket msg) {
         System.out.println("read0");
     }
 
@@ -18,7 +18,7 @@ public class ClientGetHandler extends SimpleChannelInboundHandler<GetDataPacket>
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         // 3rd called
         // may be called later
         GetDataPacket getDataPacket = new GetDataPacket();
