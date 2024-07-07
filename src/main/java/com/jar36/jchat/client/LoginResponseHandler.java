@@ -1,38 +1,25 @@
 package com.jar36.jchat.client;
 
-import com.jar36.jchat.Util;
 import com.jar36.jchat.packet.Command;
 import com.jar36.jchat.packet.LoginRequestPacket;
 import com.jar36.jchat.packet.LoginResponsePacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.util.Scanner;
-
 public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginResponsePacket> {
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
-        // 1st called
-        // connect to server
-        System.out.println("Logging to server");
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Input username: ");
-        ClientMain.username = scanner.nextLine();
-
-//        Terminal terminal = TerminalBuilder.builder().system(true).build();
-//        LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
-//
-//        String passwdHash = Util.sha256(lineReader.readLine("Input password: ", '*'));
-
-        System.out.print("Input password: ");
-        String passwdHash = Util.sha256(scanner.nextLine());
-
-        LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
-        loginRequestPacket.setUsername(ClientMain.username);
-        loginRequestPacket.setPasswdHash(passwdHash);
-        loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_LOGIN);
-        ctx.channel().writeAndFlush(loginRequestPacket);
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof UserEvent) {
+            UserEvent userEvent = (UserEvent) evt;
+            if (userEvent.getEventID() == UserEvent.LOGIN_TRIGGERED) {
+                LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
+                loginRequestPacket.setUsername(ClientMain.username);
+                loginRequestPacket.setPasswdHash(ClientMain.passwdHash);
+                loginRequestPacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_LOGIN);
+                ctx.channel().writeAndFlush(loginRequestPacket);
+            }
+        }
+        super.userEventTriggered(ctx, evt);
     }
 
     @Override
@@ -59,7 +46,7 @@ public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginRespo
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         System.out.println("Connection to server was lost! exiting");
         System.exit(0);
     }
