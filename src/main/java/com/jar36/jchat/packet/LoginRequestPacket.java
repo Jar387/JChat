@@ -1,6 +1,7 @@
 package com.jar36.jchat.packet;
 
 public class LoginRequestPacket extends Packet {
+    private String JWTCode;
     private String username;
     private String passwdHash;
     private char subfunction;
@@ -32,5 +33,13 @@ public class LoginRequestPacket extends Packet {
     @Override
     public Short getCommand() {
         return Command.LOGIN_REQUEST;
+    }
+
+    public String getJWTCode() {
+        return JWTCode;
+    }
+
+    public void setJWTCode(String JWTCode) {
+        this.JWTCode = JWTCode;
     }
 }

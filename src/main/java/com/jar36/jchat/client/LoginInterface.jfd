@@ -38,6 +38,14 @@ new FormModel {
 				"y": 155
 				"width": 135
 			} )
+			add( new FormComponent( "javax.swing.JCheckBox" ) {
+				name: "autologincheckbox"
+				"text": "save login"
+				addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "autologincheckboxItemStateChanged", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 180
+				"y": 200
+			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label2"
 				"text": "Password"

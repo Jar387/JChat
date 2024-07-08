@@ -1,0 +1,47 @@
+JFDML JFormDesigner: "8.2.3.0.386" Java: "17.0.11" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "chatButton"
+				"text": "chat"
+				"foreground": new java.awt.Color( 255, 255, 255, 255 )
+				"background": new java.awt.Color( 51, 204, 0, 255 )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 0
+				"y": 530
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "contactButton"
+				"text": "Contact"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 75
+				"y": 530
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "accountButton"
+				"text": "Account"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 150
+				"y": 530
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "bottomDecoration"
+				"opaque": true
+				"enabled": false
+				"background": new java.awt.Color( 204, 204, 204, 255 )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 0
+				"y": 530
+				"width": 800
+				"height": 35
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 110, 120 )
+			"size": new java.awt.Dimension( 800, 600 )
+		} )
+	}
+}

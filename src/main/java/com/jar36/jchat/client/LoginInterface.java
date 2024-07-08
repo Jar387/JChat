@@ -9,6 +9,7 @@ import com.jar36.jchat.Util;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 
 /**
  * @author aiyu
@@ -19,12 +20,25 @@ public class LoginInterface extends JFrame {
     private JTextField username;
     private JPasswordField passwd;
     private JButton confirmbutton;
+    private JCheckBox autologincheckbox;
     private JLabel label2;
     private JLabel label3;
     private JLabel label4;
     private JLabel label5;
+    private boolean autoLogin;
+
+    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
     public LoginInterface() {
         initComponents();
+        if (ClientMain.JWTCode != null && ClientMain.username != null) {
+            autologincheckbox.setSelected(true);
+            username.setText(ClientMain.username);
+            passwd.setText("********");
+        }
+    }
+
+    public boolean isAutoLogin() {
+        return autoLogin;
     }
 
     private void confirmButtonClicked(ActionEvent e) {
@@ -33,12 +47,23 @@ public class LoginInterface extends JFrame {
         ClientMain.channel.pipeline().fireUserEventTriggered(new UserEvent(UserEvent.LOGIN_TRIGGERED));
     }
 
+    private void autologincheckboxItemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            autoLogin = true;
+        }
+        if (e.getStateChange() == ItemEvent.DESELECTED) {
+            autoLogin = false;
+        }
+    }
+
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         title = new JLabel();
         username = new JTextField();
         passwd = new JPasswordField();
         confirmbutton = new JButton();
+        autologincheckbox = new JCheckBox();
         label2 = new JLabel();
         label3 = new JLabel();
         label4 = new JLabel();
@@ -65,6 +90,12 @@ public class LoginInterface extends JFrame {
         confirmbutton.addActionListener(e -> confirmButtonClicked(e));
         contentPane.add(confirmbutton);
         confirmbutton.setBounds(85, 155, 135, confirmbutton.getPreferredSize().height);
+
+        //---- autologincheckbox ----
+        autologincheckbox.setText("save login");
+        autologincheckbox.addItemListener(e -> autologincheckboxItemStateChanged(e));
+        contentPane.add(autologincheckbox);
+        autologincheckbox.setBounds(new Rectangle(new Point(180, 200), autologincheckbox.getPreferredSize()));
 
         //---- label2 ----
         label2.setText("Password");
@@ -104,5 +135,4 @@ public class LoginInterface extends JFrame {
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
-    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

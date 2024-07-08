@@ -1,5 +1,8 @@
 package com.jar36.jchat.server;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.jar36.jchat.LoggerFormatter;
 import com.jar36.jchat.packet.PacketDecoder;
 import com.jar36.jchat.packet.PacketEncoder;
@@ -18,10 +21,15 @@ import java.util.logging.Logger;
 public class ServerMain {
     public static final Logger logger = LoggerFormatter.installFormatter(Logger.getLogger(ServerMain.class.getSimpleName()));
     public static final short port = 8888;
+    public static final String issuer = "jchat_server.com";
+    public static Algorithm algorithm;
+    public static JWTVerifier jwtVerifier;
 
     public static void main(String[] Args) throws InterruptedException {
         // selfSignedCertificate = new SelfSignedCertificate();
         // SslContext sslContext = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).build();
+        algorithm = Algorithm.HMAC512("secret"); // TODO generate new key for every server start
+        jwtVerifier = JWT.require(algorithm).withIssuer(issuer).build();
         logger.info("Generating keypair...done");
         // load user data
         SqlManager.loadDatabase();

@@ -1,21 +1,13 @@
 package com.jar36.jchat.packet;
 
 public class LoginResponsePacket extends Packet {
-    private long sessionToken;
     private String reason;
     private char subfunction;
+    private String JWTCode;
 
     @Override
     public Short getCommand() {
         return Command.LOGIN_RESPONSE;
-    }
-
-    public long getSessionToken() {
-        return sessionToken;
-    }
-
-    public void setSessionToken(long sessionToken) {
-        this.sessionToken = sessionToken;
     }
 
     public String getReason() {
@@ -32,5 +24,13 @@ public class LoginResponsePacket extends Packet {
 
     public void setSubfunction(char subfunction) {
         this.subfunction = subfunction;
+    }
+
+    public String getJWTCode() {
+        return JWTCode;
+    }
+
+    public void setJWTCode(String JWTCode) {
+        this.JWTCode = JWTCode;
     }
 }

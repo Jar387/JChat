@@ -1,5 +1,11 @@
 package com.jar36.jchat.server;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.IncorrectClaimException;
+import com.auth0.jwt.exceptions.MissingClaimException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.jar36.jchat.SqlHelper;
 import com.jar36.jchat.Util;
 import com.jar36.jchat.packet.Command;
@@ -13,49 +19,75 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Random;
+import java.util.Date;
 
 import static com.jar36.jchat.server.ServerMain.logger;
 
 public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginRequestPacket> {
     private void loginHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
-        loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
-        UserData ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
-        if (ud != null) { // user exist
-            if (Util.verifyUsername(loginRequestPacket.getUsername()) != null) { // already logged in
-                loginResponsePacket.setSessionToken(0);
-                loginResponsePacket.setReason("Cannot login: your account already logged in");
+        loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_JWT_EXPIRED);
+        UserData ud;
+        // handle JWT code
+        if (loginRequestPacket.getJWTCode() != null) {
+            try {
+                DecodedJWT decodedJWT = ServerMain.jwtVerifier.verify(loginRequestPacket.getJWTCode());
+                ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", decodedJWT.getSubject());
+            } catch (SignatureVerificationException | TokenExpiredException | MissingClaimException |
+                     IncorrectClaimException e) {
+                loginResponsePacket.setReason("JWT expired");
                 channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
                 return;
             }
-            if (ud.getPasswdHash().compareTo(loginRequestPacket.getPasswdHash()) == 0) { // passwd ok
+        } else {
+            ud = SqlHelper.queryTableToObject(SqlManager.userDataBaseStatement, UserData.class, "name", loginRequestPacket.getUsername());
+        }
+        if (ud != null) { // user exist
+            if (loginRequestPacket.getJWTCode() == null) {
+                if (Util.verifyUsername(loginRequestPacket.getUsername()) != null) { // already logged in
+                    loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_ERROR);
+                    loginResponsePacket.setReason("your account already logged in");
+                    channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+                    return;
+                }
+                if (ud.getPasswdHash().compareTo(loginRequestPacket.getPasswdHash()) == 0) { // passwd ok
+                    User user = new User();
+                    user.setIp(channelHandlerContext.channel().remoteAddress().toString());
+                    user.setChannel(channelHandlerContext.channel());
+                    user.setUserData(ud);
+                    logger.info("Client connected, username " + ud.getName() + " ip " + user.getIp());
+                    loginResponsePacket.setJWTCode(JWT.create().withSubject(user.getUserData().getName()).withIssuer(ServerMain.issuer)
+                            .withExpiresAt(new Date(System.currentTimeMillis() + 3600000)).sign(ServerMain.algorithm));
+                    channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+                    User.users.add(user); // in memory database
+                    return;
+                }
+                loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_ERROR);
+                loginResponsePacket.setReason("password error");
+                channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
+                return;
+            } else {
                 User user = new User();
                 user.setIp(channelHandlerContext.channel().remoteAddress().toString());
                 user.setChannel(channelHandlerContext.channel());
                 user.setUserData(ud);
-                logger.info("Client connected, username " + ud.getName() + " ip " + user.getIp());
-                Random random = new Random();
-                long sessionToken = random.nextLong();
-                loginResponsePacket.setSessionToken(sessionToken);
-                user.setSessionToken(sessionToken);
+                logger.info("Client connected with JWT, username " + ud.getName() + " ip " + user.getIp());
+                loginResponsePacket.setSubfunction(loginResponsePacket.getSubfunction());
+                loginResponsePacket.setJWTCode(JWT.create().withSubject(user.getUserData().getName()).withIssuer(ServerMain.issuer)
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 3600000)).sign(ServerMain.algorithm));
                 channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-                User.users.add(user); // in memory database
+                User.users.add(user);
                 return;
             }
-            loginResponsePacket.setSessionToken(0);
-            loginResponsePacket.setReason("Cannot login: password error");
-            channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
-            return;
         }
-        loginResponsePacket.setSessionToken(0);
-        loginResponsePacket.setReason("Cannot login: user not exist");
+        loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_ERROR);
+        loginResponsePacket.setReason("user not exist");
         channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
     }
 
     private void createUserHandler(ChannelHandlerContext channelHandlerContext, LoginRequestPacket loginRequestPacket) throws IOException, SQLException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
         LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
-        loginResponsePacket.setSessionToken(0);
+        loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_ERROR);
         loginResponsePacket.setSubfunction(loginRequestPacket.getSubfunction());
         if (loginRequestPacket.getUsername().isEmpty() || loginRequestPacket.getUsername().length() > 255) { // check username length
             loginResponsePacket.setReason("Cannot create user: illegal username length");
@@ -74,7 +106,7 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
         userData.setName(loginRequestPacket.getUsername());
         userData.setPasswdHash(loginRequestPacket.getPasswdHash());
         SqlHelper.insertObject(SqlManager.userDataBaseStatement, UserData.class, userData);
-        loginResponsePacket.setSessionToken(1);
+        loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_SUCCESS);
         channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
     }
 
@@ -89,7 +121,7 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
                 break;
             default:
                 LoginResponsePacket loginResponsePacket = new LoginResponsePacket();
-                loginResponsePacket.setSessionToken(0);
+                loginResponsePacket.setSubfunction(Command.LOGIN_REQUEST_SUBFUNCTION_RESPONSE_ERROR);
                 channelHandlerContext.channel().writeAndFlush(loginResponsePacket);
         }
     }
