@@ -12,66 +12,37 @@ import java.awt.*;
  */
 public class MainInterface extends JFrame {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    private JButton chatButton;
-    private JButton contactButton;
-    private JButton accountButton;
-    private JLabel bottomDecoration;
-    public MainInterface() {
+    private JScrollPane scrollPane1;
+    private JList list1;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
+    public MainInterface(){
         initComponents();
+        list1.add(new Label("11111111"));
+        list1.add(new Label("22222222"));
+        list1.add(new Label("33333333"));
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        chatButton = new JButton();
-        contactButton = new JButton();
-        accountButton = new JButton();
-        bottomDecoration = new JLabel();
+        scrollPane1 = new JScrollPane();
+        list1 = new JList();
 
         //======== this ========
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
-        //---- chatButton ----
-        chatButton.setText("chat");
-        chatButton.setForeground(Color.white);
-        chatButton.setBackground(new Color(0x33cc00));
-        contentPane.add(chatButton);
-        chatButton.setBounds(new Rectangle(new Point(0, 530), chatButton.getPreferredSize()));
-
-        //---- contactButton ----
-        contactButton.setText("Contact");
-        contentPane.add(contactButton);
-        contactButton.setBounds(new Rectangle(new Point(75, 530), contactButton.getPreferredSize()));
-
-        //---- accountButton ----
-        accountButton.setText("Account");
-        contentPane.add(accountButton);
-        accountButton.setBounds(new Rectangle(new Point(150, 530), accountButton.getPreferredSize()));
-
-        //---- bottomDecoration ----
-        bottomDecoration.setOpaque(true);
-        bottomDecoration.setEnabled(false);
-        bottomDecoration.setBackground(new Color(0xcccccc));
-        contentPane.add(bottomDecoration);
-        bottomDecoration.setBounds(0, 530, 800, 35);
-
+        //======== scrollPane1 ========
         {
-            // compute preferred size
-            Dimension preferredSize = new Dimension();
-            for(int i = 0; i < contentPane.getComponentCount(); i++) {
-                Rectangle bounds = contentPane.getComponent(i).getBounds();
-                preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-            }
-            Insets insets = contentPane.getInsets();
-            preferredSize.width += insets.right;
-            preferredSize.height += insets.bottom;
-            contentPane.setMinimumSize(preferredSize);
-            contentPane.setPreferredSize(preferredSize);
+            scrollPane1.setViewportView(list1);
         }
+        contentPane.add(scrollPane1);
+        scrollPane1.setBounds(0, 0, 400, 565);
+
+        contentPane.setPreferredSize(new Dimension(800, 600));
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
-    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

@@ -15,6 +15,7 @@ import java.awt.event.ItemEvent;
  * @author aiyu
  */
 public class LoginInterface extends JFrame {
+    private boolean autoLogin;
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JLabel title;
     private JTextField username;
@@ -25,8 +26,6 @@ public class LoginInterface extends JFrame {
     private JLabel label3;
     private JLabel label4;
     private JLabel label5;
-    private boolean autoLogin;
-
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
     public LoginInterface() {
         initComponents();
@@ -34,6 +33,7 @@ public class LoginInterface extends JFrame {
             autologincheckbox.setSelected(true);
             username.setText(ClientMain.username);
             passwd.setText("********");
+            confirmButtonClicked(null);
         }
     }
 
@@ -70,6 +70,8 @@ public class LoginInterface extends JFrame {
         label5 = new JLabel();
 
         //======== this ========
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
@@ -117,20 +119,7 @@ public class LoginInterface extends JFrame {
         contentPane.add(label5);
         label5.setBounds(new Rectangle(new Point(45, 115), label5.getPreferredSize()));
 
-        {
-            // compute preferred size
-            Dimension preferredSize = new Dimension();
-            for(int i = 0; i < contentPane.getComponentCount(); i++) {
-                Rectangle bounds = contentPane.getComponent(i).getBounds();
-                preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-                preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-            }
-            Insets insets = contentPane.getInsets();
-            preferredSize.width += insets.right;
-            preferredSize.height += insets.bottom;
-            contentPane.setMinimumSize(preferredSize);
-            contentPane.setPreferredSize(preferredSize);
-        }
+        contentPane.setPreferredSize(new Dimension(300, 400));
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
